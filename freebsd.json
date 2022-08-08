@@ -17,6 +17,15 @@
         "memory": 8192,
         "cores": 2,
         "sockets":1,
+        "boot_command": [
+            "2<enter><wait10><wait10>",
+            "/bin/sh<enter><wait>",
+            "mdmfs -s 100m md1 /tmp<enter><wait>",
+            "dhclient -l /tmp/dhclient.lease.vtnet0 vtnet0<enter><wait5>",
+            "fetch -o /tmp/setup http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.sh<enter><wait><wait>",
+            "tr -d '\\015' </tmp/setup >/tmp/setup.2<enter><wait>",
+            "bsdinstall script /tmp/setup.2<enter>"
+        ],
         "network_adapters": [
           {
             "model": "virtio",
