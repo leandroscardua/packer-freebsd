@@ -1,0 +1,48 @@
+{
+    "variables": {
+      "username": "",
+      "password": ""
+    },
+    "builders": [
+      {
+        "type": "proxmox",
+        "proxmox_url": "",
+        "insecure_skip_tls_verify": true,
+        "username": "{{user `username`}}",
+        "password": "{{user `password`}}",
+  
+        "node": "proxmox",
+        "scsi_controller": "virtio-scsi-pci",
+        "os": "other",
+        "memory": 8192,
+        "cores": 2,
+        "sockets":1,
+        "network_adapters": [
+          {
+            "model": "virtio",
+            "bridge": "vmbr0"
+          }
+        ],
+        "disks": [
+          {
+            "type": "virtio",
+            "disk_size": "32G",
+            "storage_pool": "local-lvm",
+            "storage_pool_type": "lvm"
+          }
+        ],
+        
+        "communicator": "none",
+
+        "iso_url": "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.1/FreeBSD-13.1-RELEASE-amd64-dvd1.iso",
+        "iso_storage_pool": "local",
+        "iso_checksum": "none",
+        "unmount_iso": true,
+        "cloud_init": true,
+        "cloud_init_storage_pool": "local-lvm",
+        "boot_command": ["<wait1m>"],
+        "template_name": "freebsd-base",
+        "template_description": "Freebsd Base Image"
+      }
+    ]
+  }
