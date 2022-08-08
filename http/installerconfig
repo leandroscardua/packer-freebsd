@@ -1,0 +1,83 @@
+# Selecting Components to Install
+export DISTRIBUTIONS="base.txz kernel.txz"
+
+# Non-interactive
+export nonInteractive="YES"
+
+# for variations in the root disk device name between VMware and Virtualbox
+if [ -e /dev/ada0 ]; then
+  DISKSLICE=ada0
+elif [ -e /dev/da0 ]; then
+  DISKSLICE=da0
+elif [ -e /dev/vtbd0 ]; then
+  DISKSLICE=vtbd0
+else
+  echo "Unknown disk for install.sh to work with!"
+  exit -1
+fi
+
+#Using Partition the disk with ZFS
+export ZFSBOOT_DISKS="$DISKSLICE"
+export ZFSBOOT_VDEV_TYPE="stripe"
+export ZFSBOOT_SWAP_SIZE=2g
+export ZFSBOOT_CONFIRM_LAYOUT=1
+
+# Setting hostname name.domain
+export HOSTNAME=freebsd.lan
+
+#Setting username and password
+export USERNAME=(( enter usename here }}
+export PASSWORD={{ enter password here }}
+
+#!/bin/sh -x
+
+# Create user
+echo "${USERNAME}" | pw useradd -n "${USERNAME}" -h 0 -m -s /bin/tcsh
+echo "${PASSWORD}" | pw usermod "${PASSWORD}" -h 0 -s /bin/tcsh
+
+cat <<EOF > /usr/local/etc/sudoers.d/"${USERNAME}" 
+Defaults:"${USERNAME}"  !requiretty
+"${USERNAME}" ALL=(ALL) NOPASSWD: ALL
+EOF
+chmod 440 /usr/local/etc/sudoers.d/"${USERNAME}" 
+
+# Select the network interface available
+ifdev=$(ifconfig | grep '^[a-z]' | cut -d: -f1 | head -n 1)
+
+# Get a IP on the interface
+dhclient ${ifdev}
+
+# Enable/disable required services at boot
+cat >> /etc/rc.conf << EOT
+ifconfig_${ifdev}="dhcp"
+keymap="us.kbd"
+sshd_enable="YES"
+sendmail_enable="NO"
+hostname="${HOSTNAME}"
+ntpd_enable="YES"
+ntpd_sync_on_start="YES"
+EOT
+
+# Set Time Zone
+/bin/cp /usr/share/zoneinfo/EST /etc/localtime
+/usr/bin/touch /etc/wall_cmos_clock
+/sbin/adjkerntz -a
+
+# Bootstrap the system
+env ASSUME_ALWAYS_YES=YES pkg bootstrap -f
+
+# Download updates
+freebsd-update fetch 
+freebsd-update install
+
+# Install basic pkg
+pkg install -y sudo
+
+# remove the autounattend file and system cleanup
+rm -rf /var/db/freebsd-update/*
+rm -rf /boot/kernel/*.symbols
+rm -rf /tmp/installscript
+rm -rf /etc/installscript
+
+# Poweroff the system
+poweroff
