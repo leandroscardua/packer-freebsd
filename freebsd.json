@@ -18,13 +18,15 @@
         "cores": 2,
         "sockets":1,
         "boot_command": [
-            "2<enter><wait10><wait10>",
+            "<esc><wait>",
+            "boot -s<enter>",
+            "<wait10><wait><wait>",
             "/bin/sh<enter><wait>",
             "mdmfs -s 100m md1 /tmp<enter><wait>",
+            "mdmfs -s 100m md2 /mnt<enter><wait>",
             "dhclient -l /tmp/dhclient.lease.vtnet0 vtnet0<enter><wait5>",
-            "fetch -o /tmp/setup http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.sh<enter><wait><wait>",
-            "tr -d '\\015' </tmp/setup >/tmp/setup.2<enter><wait>",
-            "bsdinstall script /tmp/setup.2<enter>"
+            "fetch -o /tmp/setup http://{{ .HTTPIP }}:{{ .HTTPPort }}/install_i386.sh<enter><wait><wait>",
+            "bsdinstall script /tmp/setup<enter>"
         ],
         "network_adapters": [
           {
