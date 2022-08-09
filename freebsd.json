@@ -25,8 +25,8 @@
             "mdmfs -s 100m md1 /tmp<enter><wait>",
             "mdmfs -s 100m md2 /mnt<enter><wait>",
             "dhclient -l /tmp/dhclient.lease.vtnet0 vtnet0<enter><wait5>",
-            "fetch -o /tmp/setup http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig.sh<enter><wait><wait>",
-            "bsdinstall script /tmp/setup<enter>"
+            "fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig<enter><wait><wait>",
+            "bsdinstall script /tmp/installerconfig<enter>"
         ],
         "network_adapters": [
           {
